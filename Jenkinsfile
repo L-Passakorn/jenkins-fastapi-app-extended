@@ -61,12 +61,14 @@ pipeline {
                 withSonarQubeEnv('sonar-scanner') { // Ensure 'Sonarqube' matches Jenkins config
                     sh '''
                     echo "===== Running SonarQube Analysis ====="
-                    # Install Java if not present
-                    apt-get update && apt-get install -y openjdk-17-jdk
-                    # Ensure Java is available
+                    # Download and install OpenJDK 17
+                    curl -L -o openjdk.tar.gz https://download.java.net/java/GA/jdk17.0.2/dfd4a8d0985749f896bed50d7138ee7f/8/GPL/openjdk-17.0.2_linux-x64_bin.tar.gz
+                    tar -xzf openjdk.tar.gz
+                    export JAVA_HOME=$PWD/jdk-17.0.2
+                    export PATH=$JAVA_HOME/bin:$PATH
+                    # Verify Java
                     java -version
-                    which java
-                    # Install Sonar Scanner CLI
+                    # Download and install Sonar Scanner CLI
                     curl -L --output sonar-scanner-cli.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
                     unzip sonar-scanner-cli.zip
                     export PATH=$PWD/sonar-scanner-4.8.0.2856-linux/bin:$PATH
