@@ -57,9 +57,6 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            environment {
-                SONAR_HOST_URL = 'http://localhost:9000'
-            }
             steps {
                 withSonarQubeEnv('sonar-scanner') { // Ensure 'Sonarqube' matches Jenkins config
                     sh '''
