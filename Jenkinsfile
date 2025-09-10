@@ -50,6 +50,7 @@ pipeline {
                 sh '''
                 echo "===== Running Tests ====="
                 . venv/bin/activate
+                export PYTHONPATH=$PWD:$PYTHONPATH
                 pytest --maxfail=1 --disable-warnings -q --cov=app --cov-report=xml
                 '''
             }
