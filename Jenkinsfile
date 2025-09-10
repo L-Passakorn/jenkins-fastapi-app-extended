@@ -64,19 +64,18 @@ pipeline {
                 withSonarQubeEnv('sonar-scanner') { // Ensure 'Sonarqube' matches Jenkins config
                     sh '''
                     echo "===== Running SonarQube Analysis ====="
-                    # Download and install OpenJDK 17
-                    curl -L -o openjdk.tar.gz https://download.java.net/java/GA/jdk17.0.2/dfd4a8d0985749f896bed50d7138ee7f/8/GPL/openjdk-17.0.2_linux-x64_bin.tar.gz
-                    tar -xzf openjdk.tar.gz
-                    export JAVA_HOME=$PWD/jdk-17.0.2
-                    export PATH=$JAVA_HOME/bin:$PATH
-                    # Verify Java
+                    # Ensure Java is available
                     java -version
-                    # Download and install Sonar Scanner CLI
-                    curl -L --output sonar-scanner-cli.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
-                    unzip -o sonar-scanner-cli.zip
-                    export PATH=$PWD/sonar-scanner-4.8.0.2856-linux/bin:$PATH
+                    which java
                     # Ensure Python venv is active if sonar-scanner needs specific packages
                     . venv/bin/activate
+                    # Run Sonar Scanner CLI (ensure it's installed in the Jenkins image or install it here)
+                    # If sonar-scanner is not installed globally, you might need to download it or install via pip
+                    # Example installing sonar-scanner CLI (uncomment if needed):
+                    # curl -L --output sonar-scanner-cli.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
+                    # unzip sonar-scanner-cli.zip
+                    # export PATH=$PWD/sonar-scanner-4.8.0.2856-linux/bin:$PATH
+
                     sonar-scanner
                     '''
                 }
