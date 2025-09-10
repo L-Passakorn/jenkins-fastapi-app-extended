@@ -1,6 +1,12 @@
 pipeline {
-    // Use the Jenkins controller/master node (where Docker is installed) as the agent
-    agent any // Or specify a label if your controller has one, e.g., agent { label 'master' }
+    // Use a Docker agent with Python pre-installed to avoid installation issues
+    agent {
+        docker {
+            image 'python:3.11'
+            // Mount Docker socket for building/pushing images (ensure host Docker is accessible)
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
 
     // Optionally specify tools if configured in Jenkins Global Tool Configuration
     // tools {
@@ -25,19 +31,17 @@ pipeline {
         stage('Setup Environment (Python)') {
             steps {
                 sh '''
-                    echo "===== Setting up Python Virtual Environment ====="
-                    # Install Python 3 if not present (adjust for your OS; this assumes Debian/Ubuntu)
-                    apt-get update && apt-get install -y python3 python3-venv python3-pip
-                    # Use system python3 or the one available in the Jenkins image
-                    python3 -m venv venv
-                    . venv/bin/activate
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
+                echo "===== Setting up Python Virtual Environment ====="
+                # Python is already available in the Docker image; no need to install
+                python3 -m venv venv
+                . venv/bin/activate
+                pip install --upgrade pip
+                pip install -r requirements.txt
 
-                    # Verify installations
-                    . venv/bin/activate && python -c "import sys; print(sys.version)"
-                    . venv/bin/activate && pip list
-                    '''
+                # Verify installations
+                . venv/bin/activate && python -c "import sys; print(sys.version)"
+                . venv/bin/activate && pip list
+                '''
             }
         }
 
@@ -56,18 +60,17 @@ pipeline {
                 withSonarQubeEnv('sonar-scanner') { // Ensure 'Sonarqube' matches Jenkins config
                     sh '''
                     echo "===== Running SonarQube Analysis ====="
+                    # Install Java if not present
+                    apt-get update && apt-get install -y openjdk-17-jdk
                     # Ensure Java is available
                     java -version
                     which java
+                    # Install Sonar Scanner CLI
+                    curl -L --output sonar-scanner-cli.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
+                    unzip sonar-scanner-cli.zip
+                    export PATH=$PWD/sonar-scanner-4.8.0.2856-linux/bin:$PATH
                     # Ensure Python venv is active if sonar-scanner needs specific packages
                     . venv/bin/activate
-                    # Run Sonar Scanner CLI (ensure it's installed in the Jenkins image or install it here)
-                    # If sonar-scanner is not installed globally, you might need to download it or install via pip
-                    # Example installing sonar-scanner CLI (uncomment if needed):
-                    # curl -L --output sonar-scanner-cli.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
-                    # unzip sonar-scanner-cli.zip
-                    # export PATH=$PWD/sonar-scanner-4.8.0.2856-linux/bin:$PATH
-
                     sonar-scanner
                     '''
                 }
