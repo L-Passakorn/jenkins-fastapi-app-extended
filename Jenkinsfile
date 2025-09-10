@@ -10,7 +10,7 @@ pipeline {
 
     environment {
         // Ensure this matches the credential ID you create in Jenkins
-        SONARQUBE = credentials('sonarqube_token1')
+        SONARQUBE = credentials('sonarqube_token_extended')
         // If not using tools{} and Java is installed in the Jenkins image, you might need to set JAVA_HOME
         // JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64' // Example path, check your Jenkins image
     }
@@ -18,7 +18,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/PHATSAWUT-DG/Jenkins_Demopipe01.git'
+                git branch: 'main', url: 'https://github.com/L-Passakorn/jenkins-fastapi-app-extended.git'
             }
         }
 
@@ -51,7 +51,7 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('Sonarqube') { // Ensure 'Sonarqube' matches Jenkins config
+                withSonarQubeEnv('sonar-scanner') { // Ensure 'Sonarqube' matches Jenkins config
                     sh '''
                     echo "===== Running SonarQube Analysis ====="
                     # Ensure Java is available
