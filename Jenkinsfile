@@ -11,8 +11,8 @@ pipeline {
     environment {
         // Ensure this matches the credential ID you create in Jenkins
         SONARQUBE = credentials('sonarqube_token_extended')
-        // If not using tools{} and Java is installed in the Jenkins image, you might need to set JAVA_HOME
-        // JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64' // Example path, check your Jenkins image
+    // If not using tools{} and Java is installed in the Jenkins image, you might need to set JAVA_HOME
+    // JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64' // Example path, check your Jenkins image
     }
 
     stages {
@@ -25,17 +25,19 @@ pipeline {
         stage('Setup Environment (Python)') {
             steps {
                 sh '''
-                echo "===== Setting up Python Virtual Environment ====="
-                # Use system python3 or the one available in the Jenkins image
-                python3 -m venv venv
-                . venv/bin/activate
-                pip install --upgrade pip
-                pip install -r requirements.txt
+                    echo "===== Setting up Python Virtual Environment ====="
+                    # Install Python 3 if not present (adjust for your OS; this assumes Debian/Ubuntu)
+                    apt-get update && apt-get install -y python3 python3-venv python3-pip
+                    # Use system python3 or the one available in the Jenkins image
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
 
-                # Verify installations
-                . venv/bin/activate && python -c "import sys; print(sys.version)"
-                . venv/bin/activate && pip list
-                '''
+                    # Verify installations
+                    . venv/bin/activate && python -c "import sys; print(sys.version)"
+                    . venv/bin/activate && pip list
+                    '''
             }
         }
 
@@ -74,7 +76,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                 // Ensure Docker commands run on the *host* using the mounted socket
+                // Ensure Docker commands run on the *host* using the mounted socket
                 sh '''
                 echo "===== Building Docker Image ====="
                 docker build -t fastapi-app:latest .
@@ -95,7 +97,7 @@ pipeline {
             }
         }
 
-         stage('Push to Registry') {
+        stage('Push to Registry') {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'dockerhub-cred', // Ensure this matches Jenkins credential ID
@@ -114,14 +116,13 @@ pipeline {
                 }
             }
         }
-
     }
 
     post {
         always {
-            echo "Pipeline execution finished."
-             // Optional cleanup
-            // sh 'docker rmi fastapi-app:latest $DOCKER_USER/fastapi-app:latest || true'
+            echo 'Pipeline execution finished.'
+        // Optional cleanup
+        // sh 'docker rmi fastapi-app:latest $DOCKER_USER/fastapi-app:latest || true'
         }
     }
 }
