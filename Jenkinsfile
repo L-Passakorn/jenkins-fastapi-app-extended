@@ -73,7 +73,7 @@ pipeline {
                     java -version
                     # Download and install Sonar Scanner CLI
                     curl -L --output sonar-scanner-cli.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
-                    unzip sonar-scanner-cli.zip
+                    unzip -o sonar-scanner-cli.zip
                     export PATH=$PWD/sonar-scanner-4.8.0.2856-linux/bin:$PATH
                     # Ensure Python venv is active if sonar-scanner needs specific packages
                     . venv/bin/activate
