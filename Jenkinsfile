@@ -77,6 +77,8 @@ pipeline {
                     export PATH=$PWD/sonar-scanner-4.8.0.2856-linux/bin:$PATH
                     # Ensure Python venv is active if sonar-scanner needs specific packages
                     . venv/bin/activate
+                    # Override SonarQube URL for Docker container
+                    export SONAR_HOST_URL='http://host.docker.internal:9000'
                     sonar-scanner
                     '''
                 }
